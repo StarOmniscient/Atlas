@@ -74,6 +74,11 @@ export default function AppearanceSettings() {
 	const [refreshColors, setRefreshColors] = useState(0);
 	const [allThemes, setAllThemes] = useState<any[]>([]);
 	const [injectedClass, setInjectedClass] = useState<string | null>(null);
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	useEffect(() => {
 		const fetchColors = () => {
@@ -174,7 +179,7 @@ export default function AppearanceSettings() {
 			<p className="text-lg font-medium text-center sm:text-left">
 				Current Theme:{" "}
 				<span className="font-semibold">
-					{THEMES.find((t) => t.key === theme)?.name || theme}
+					{mounted ? (THEMES.find((t) => t.key === theme)?.name || theme) : "Loading..."}
 				</span>
 			</p>
 

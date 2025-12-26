@@ -15,7 +15,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-
 export default function Sidebar() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -159,7 +158,7 @@ export default function Sidebar() {
     );
 
     return (
-      <div className="flex flex-col h-full w-72 border-r border-border bg-linear-to-b from-[var(--sidebar)] to-[var(--background)]">
+      <div className="flex flex-col h-full w-72 border-r border-border bg-linear-to-b from-sidebar to-background">
         <Link href="/home">
           <div className="flex items-center gap-2 px-6 py-4 border-b border-border">
             <svg

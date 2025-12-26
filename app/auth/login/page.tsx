@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import PixelBlast from "@/components/PixelBlast"
+import PixelBlast from "@/components/backgrounds/PixelBlast"
+import Link from "next/link"
 
 export default function Page() {
   const [identifier, setIdentifier] = useState("")
@@ -128,12 +129,12 @@ export default function Page() {
 
                 <div className="mt-4 text-center text-sm">
                   Don&apos;t have an account?{" "}
-                  <a
+                  <Link
                     href="/auth/register"
                     className="underline underline-offset-4"
                   >
                     Sign up
-                  </a>
+                  </Link>
                 </div>
               </form>
             </CardContent>

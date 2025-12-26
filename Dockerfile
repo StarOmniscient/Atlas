@@ -1,6 +1,6 @@
-FROM node:25-bullseye-slim
+FROM node:25-alpine
 
-LABEL authors="Hakushi"
+LABEL authors="Akaryth"
 WORKDIR /application
 
 ENV NODE_ENV=production 
