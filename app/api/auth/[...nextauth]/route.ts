@@ -15,7 +15,6 @@ export const authOptions = {
         if (!credentials?.identifier || !credentials?.password) {
           throw new Error("Missing credentials");
         }
-
         // find user by email OR username
         const user = await prisma.user.findFirst({
           where: {

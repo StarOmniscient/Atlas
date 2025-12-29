@@ -8,6 +8,7 @@ import { THEMES } from "./themes";
 import type { UserTheme } from "@/types/usertheme";
 
 
+
 function UserThemeInjector() {
   const { theme } = useTheme();
 
@@ -48,6 +49,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <SessionProvider>
+
       <ThemeProvider
         attribute="class"
         defaultTheme="system"

@@ -1,8 +1,10 @@
-import { NavbarConfig } from "@/types/navbar";
+"use client"
+import { NavbarConfig, NavItem, NavSection } from "@/types/navbar";
 
 import { Activity, Server, Lock, Home, Bell, Cloud, Terminal, Database, Zap, Globe, Folder, FileCode, Cpu, Layers, GitBranch, Bug, Users, Shield, Key, Settings, Cog, Palette, Wrench, Box, ChartLine } from "lucide-react";
 
 
+// if you add role USER it will be hidden for admins
 export const navItems: NavbarConfig = [
   {
     section: "Overview",
@@ -60,7 +62,6 @@ export const navItems: NavbarConfig = [
   },
   {
     section: "Development",
-    role: "USER",
     items: [
       {
         label: "Projects",
@@ -144,3 +145,44 @@ export const navItems: NavbarConfig = [
     ],
   },
 ];
+
+// function to insert/remove section/item/child
+
+export function insertSection(section: NavSection, position: number = 0) {
+  navItems.splice(position, 0, section)
+}
+
+export function insertItem(section: string, item: NavItem) {
+  navItems.find((item) => item.section === section)?.items.push(item)
+}
+
+export function insertChild(section: string, Item: string, child: NavItem) {
+  navItems.find((item) => item.section === section)?.items.find((item) => item.label == Item)?.children?.push(child)
+}
+
+export function removeSection(section: string) {
+  navItems.splice(navItems.findIndex((item) => item.section === section), 1)
+}
+
+export function removeItem(section: string, Item: string) {
+ const items = navItems.find((item) => item.section === section)?.items
+ items?.splice(items.findIndex((item) => item.label === Item), 1)
+}
+
+export function removeChild(section: string, Item: string, child: string) {
+  const items = navItems.find((item) => item.section === section)?.items
+  const children = items?.find((item) => item.label == Item)?.children
+  children?.splice(children.findIndex((item) => item.label === child), 1)
+}
+
+export function updateBadge(section: string, Item: string, badge: string) {
+  const items = navItems.find((item) => item.section === section)?.items
+  const target = items?.find((item) => item.label == Item)
+  if (target) target.badge = badge;
+  
+
+}
+
+
+
+

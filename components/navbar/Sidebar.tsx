@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { navItems } from "@/config/navbarConfig";
+import { useNavigation } from "@/hooks/useNavigation";
 import {
   ArrowRight,
   ChevronDown,
@@ -19,6 +19,7 @@ export default function Sidebar() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { navbarConfig } = useNavigation();
 
   const { data: session, status } = useSession();
   const userRole = session?.user?.role;
@@ -26,7 +27,8 @@ export default function Sidebar() {
 
   useEffect(() => {
     const newOpenState: Record<string, boolean> = {};
-    navItems.forEach((section) => {
+
+    navbarConfig.forEach((section) => {
       section.items.forEach((item) => {
         if (item.children) {
           const uniqueKey = `${section.section}-${item.label}`;
@@ -38,7 +40,7 @@ export default function Sidebar() {
       });
     });
     setOpenSubmenus(newOpenState);
-  }, [pathname]);
+  }, [pathname, navbarConfig]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -60,7 +62,7 @@ export default function Sidebar() {
   const SidebarContent = () => {
     const MemoizedSections = useMemo(
       () =>
-        navItems
+        navbarConfig
           .filter((item) => !item.role || userRole === item.role)
           .map((section, sectionIdx) => (
             <div key={sectionIdx} className="mb-6 px-6">
@@ -82,8 +84,8 @@ export default function Sidebar() {
                           <Button
                             variant="ghost"
                             className={`w-full justify-start gap-3 px-3 py-2 rounded-md ${isActive
-                              ? "bg-primary/10 text-primary"
-                              : "text-foreground/80 hover:bg-muted/50 hover:text-foreground"
+                              ? "bg-primary/15 text-primary"
+                              : "text-foreground/80 hover:bg-primary/10! hover:text-foreground"
                               }`}
                             onClick={(e) => {
                               e.preventDefault();
@@ -99,9 +101,13 @@ export default function Sidebar() {
                             </span>
                             <span className="flex-1 text-left">{item.label}</span>
                             {item.badge && (
-                              <Badge variant="secondary" className="ml-2 text-xs">
-                                {item.badge}
-                              </Badge>
+                              <Badge 
+  variant="secondary" 
+  className="ml-2 text-xs max-w-[80px] truncate block"
+  title={item.badge} // Good UX: shows full text on hover
+>
+  {item.badge}
+</Badge>
                             )}
                             {hasChildren &&
                               (isSubmenuOpen ? (
@@ -128,8 +134,8 @@ export default function Sidebar() {
                                         href={child.href}
                                         scroll={false}
                                         className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${childIsActive
-                                          ? "bg-primary/10 text-primary"
-                                          : "text-foreground/80 hover:bg-muted/50 hover:text-foreground"
+                                          ? "bg-primary/15 text-primary"
+                                          : "text-foreground/80 hover:bg-primary/10 hover:text-foreground"
                                           }`}
                                       >
                                         <span
@@ -154,29 +160,16 @@ export default function Sidebar() {
               </ul>
             </div>
           )),
-      [openSubmenus, pathname, userRole]
+      [openSubmenus, pathname, userRole, navbarConfig]
     );
 
     return (
-      <div className="flex flex-col h-full w-72 border-r border-border bg-linear-to-b from-sidebar to-background">
+      <div className="flex flex-col h-full w-72 border-r border-border bg-linear-to-tr from-primary/20 to-background/10">
         <Link href="/home">
           <div className="flex items-center gap-2 px-6 py-4 border-b border-border">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-primary"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <span className="font-bold text-lg text-primary">
-              {process.env.NEXT_PUBLIC_APP_NAME}
+            
+            <span className="font-bold text-lg text-primary ">
+              {process.env.NEXT_PUBLIC_APP_NAME?.charAt(0).toUpperCase()! + process.env.NEXT_PUBLIC_APP_NAME?.slice(1)}
             </span>
             <span className="text-xs text-foreground/60">
               v{process.env.NEXT_PUBLIC_APP_VERSION}
@@ -217,7 +210,7 @@ export default function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-foreground/60 hover:text-foreground"
+                className="text-foreground/60 hover:text-foreground hover:bg-primary/10!"
                 onClick={async () => await signOut()}
               >
                 <LogOut className="h-4 w-4" />
