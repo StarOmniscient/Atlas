@@ -1,8 +1,34 @@
-"use client"
+"use client";
 import { NavbarConfig, NavItem, NavSection } from "@/types/navbar";
 
-import { Activity, Server, Lock, Home, Bell, Cloud, Terminal, Database, Zap, Globe, Folder, FileCode, Cpu, Layers, GitBranch, Bug, Users, Shield, Key, Settings, Cog, Palette, Wrench, Box, ChartLine } from "lucide-react";
-
+import {
+  Activity,
+  Server,
+  Lock,
+  Home,
+  Bell,
+  Cloud,
+  Terminal,
+  Database,
+  Zap,
+  Globe,
+  Folder,
+  FileCode,
+  Cpu,
+  Layers,
+  GitBranch,
+  Bug,
+  Users,
+  Shield,
+  Key,
+  Settings,
+  Cog,
+  Palette,
+  Wrench,
+  Box,
+  ChartLine,
+  User,
+} from "lucide-react";
 
 // if you add role USER it will be hidden for admins
 export const navItems: NavbarConfig = [
@@ -39,9 +65,21 @@ export const navItems: NavbarConfig = [
         href: "/servers",
         subtitle: "Deployed instances and resources",
         children: [
-          { label: "Production", icon: <Cloud className="h-4 w-4" />, href: "/servers/production" },
-          { label: "Staging", icon: <Cloud className="h-4 w-4" />, href: "/servers/staging" },
-          { label: "Local", icon: <Terminal className="h-4 w-4" />, href: "/servers/local" },
+          {
+            label: "Production",
+            icon: <Cloud className="h-4 w-4" />,
+            href: "/servers/production",
+          },
+          {
+            label: "Staging",
+            icon: <Cloud className="h-4 w-4" />,
+            href: "/servers/staging",
+          },
+          {
+            label: "Local",
+            icon: <Terminal className="h-4 w-4" />,
+            href: "/servers/local",
+          },
         ],
       },
       {
@@ -49,8 +87,16 @@ export const navItems: NavbarConfig = [
         icon: <Database className="h-4 w-4" />,
         href: "/databases",
         children: [
-          { label: "PostgreSQL", icon: <Database className="h-4 w-4" />, href: "/databases/postgres" },
-          { label: "Redis Cache", icon: <Zap className="h-4 w-4" />, href: "/databases/redis" },
+          {
+            label: "PostgreSQL",
+            icon: <Database className="h-4 w-4" />,
+            href: "/databases/postgres",
+          },
+          {
+            label: "Redis Cache",
+            icon: <Zap className="h-4 w-4" />,
+            href: "/databases/redis",
+          },
         ],
       },
       {
@@ -69,9 +115,21 @@ export const navItems: NavbarConfig = [
         href: "/projects",
         subtitle: "Source-managed repositories",
         children: [
-          { label: "Frontend", icon: <FileCode className="h-4 w-4" />, href: "/projects/frontend" },
-          { label: "Backend", icon: <Cpu className="h-4 w-4" />, href: "/projects/backend" },
-          { label: "Infrastructure", icon: <Layers className="h-4 w-4" />, href: "/projects/infrastructure" },
+          {
+            label: "Frontend",
+            icon: <FileCode className="h-4 w-4" />,
+            href: "/projects/frontend",
+          },
+          {
+            label: "Backend",
+            icon: <Cpu className="h-4 w-4" />,
+            href: "/projects/backend",
+          },
+          {
+            label: "Infrastructure",
+            icon: <Layers className="h-4 w-4" />,
+            href: "/projects/infrastructure",
+          },
         ],
       },
       {
@@ -101,8 +159,16 @@ export const navItems: NavbarConfig = [
         icon: <Users className="h-4 w-4" />,
         href: "/users",
         children: [
-          { label: "Roles", icon: <Shield className="h-4 w-4" />, href: "/users/roles" },
-          { label: "Permissions", icon: <Key className="h-4 w-4" />, href: "/users/permissions" },
+          {
+            label: "Roles",
+            icon: <Shield className="h-4 w-4" />,
+            href: "/users/roles",
+          },
+          {
+            label: "Permissions",
+            icon: <Key className="h-4 w-4" />,
+            href: "/users/permissions",
+          },
         ],
       },
       {
@@ -126,9 +192,27 @@ export const navItems: NavbarConfig = [
         icon: <Settings className="h-4 w-4" />,
         href: "/settings",
         children: [
-          { label: "General", icon: <Cog className="h-4 w-4" />, href: "/settings/general" },
-          { label: "Appearance", icon: <Palette className="h-4 w-4" />, href: "/settings/appearance" },
-          { label: "System", icon: <Wrench className="h-4 w-4" />, href: "/settings/system", role: "ADMIN" },
+          {
+            label: "General",
+            icon: <Cog className="h-4 w-4" />,
+            href: "/settings/general",
+          },
+          {
+            label: "Appearance",
+            icon: <Palette className="h-4 w-4" />,
+            href: "/settings/appearance",
+          },
+          {
+            label: "Account",
+            icon: <User className="h-4 w-4" />,
+            href: "/settings/account",
+          },
+          {
+            label: "System",
+            icon: <Wrench className="h-4 w-4" />,
+            href: "/settings/system",
+            role: "ADMIN",
+          },
         ],
       },
       {
@@ -146,43 +230,38 @@ export const navItems: NavbarConfig = [
   },
 ];
 
-// function to insert/remove section/item/child
+// // function to insert/remove section/item/child
 
-export function insertSection(section: NavSection, position: number = 0) {
-  navItems.splice(position, 0, section)
-}
+// export function insertSection(section: NavSection, position: number = 0) {
+//   navItems.splice(position, 0, section)
+// }
 
-export function insertItem(section: string, item: NavItem) {
-  navItems.find((item) => item.section === section)?.items.push(item)
-}
+// export function insertItem(section: string, item: NavItem) {
+//   navItems.find((item) => item.section === section)?.items.push(item)
+// }
 
-export function insertChild(section: string, Item: string, child: NavItem) {
-  navItems.find((item) => item.section === section)?.items.find((item) => item.label == Item)?.children?.push(child)
-}
+// export function insertChild(section: string, Item: string, child: NavItem) {
+//   navItems.find((item) => item.section === section)?.items.find((item) => item.label == Item)?.children?.push(child)
+// }
 
-export function removeSection(section: string) {
-  navItems.splice(navItems.findIndex((item) => item.section === section), 1)
-}
+// export function removeSection(section: string) {
+//   navItems.splice(navItems.findIndex((item) => item.section === section), 1)
+// }
 
-export function removeItem(section: string, Item: string) {
- const items = navItems.find((item) => item.section === section)?.items
- items?.splice(items.findIndex((item) => item.label === Item), 1)
-}
+// export function removeItem(section: string, Item: string) {
+//  const items = navItems.find((item) => item.section === section)?.items
+//  items?.splice(items.findIndex((item) => item.label === Item), 1)
+// }
 
-export function removeChild(section: string, Item: string, child: string) {
-  const items = navItems.find((item) => item.section === section)?.items
-  const children = items?.find((item) => item.label == Item)?.children
-  children?.splice(children.findIndex((item) => item.label === child), 1)
-}
+// export function removeChild(section: string, Item: string, child: string) {
+//   const items = navItems.find((item) => item.section === section)?.items
+//   const children = items?.find((item) => item.label == Item)?.children
+//   children?.splice(children.findIndex((item) => item.label === child), 1)
+// }
 
-export function updateBadge(section: string, Item: string, badge: string) {
-  const items = navItems.find((item) => item.section === section)?.items
-  const target = items?.find((item) => item.label == Item)
-  if (target) target.badge = badge;
-  
+// export function updateBadge(section: string, Item: string, badge: string) {
+//   const items = navItems.find((item) => item.section === section)?.items
+//   const target = items?.find((item) => item.label == Item)
+//   if (target) target.badge = badge;
 
-}
-
-
-
-
+// }

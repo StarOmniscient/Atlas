@@ -5,11 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigation } from "@/hooks/useNavigation";
-import {
-  ArrowRight,
-  ChevronDown,
-  LogOut,
-} from "lucide-react";
+import { ArrowRight, ChevronDown, LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,7 +29,8 @@ export default function Sidebar() {
         if (item.children) {
           const uniqueKey = `${section.section}-${item.label}`;
           const isChildActive = item.children.some(
-            (child) => pathname === child.href || pathname.startsWith(child.href + "/")
+            (child) =>
+              pathname === child.href || pathname.startsWith(child.href + "/")
           );
           if (isChildActive) newOpenState[uniqueKey] = true;
         }
@@ -50,14 +47,14 @@ export default function Sidebar() {
   }, []);
 
   const toggleSubmenu = (key: string) => {
-    const currentScroll = document.querySelector(".sidebar-scroll")?.scrollTop ?? 0;
+    const currentScroll =
+      document.querySelector(".sidebar-scroll")?.scrollTop ?? 0;
     setOpenSubmenus((prev) => ({ ...prev, [key]: !prev[key] }));
     requestAnimationFrame(() => {
       const container = document.querySelector(".sidebar-scroll");
       if (container) container.scrollTop = currentScroll;
     });
   };
-
 
   const SidebarContent = () => {
     const MemoizedSections = useMemo(
@@ -83,10 +80,11 @@ export default function Sidebar() {
                         <div className="relative">
                           <Button
                             variant="ghost"
-                            className={`w-full justify-start gap-3 px-3 py-2 rounded-md ${isActive
-                              ? "bg-primary/15 text-primary"
-                              : "text-foreground/80 hover:bg-primary/10! hover:text-foreground"
-                              }`}
+                            className={`w-full justify-start gap-3 px-3 py-2 rounded-md ${
+                              isActive
+                                ? "bg-primary/15 text-primary"
+                                : "text-foreground/80 hover:bg-primary/10! hover:text-foreground"
+                            }`}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -94,20 +92,23 @@ export default function Sidebar() {
                             }}
                           >
                             <span
-                              className={`h-4 w-4 ${isActive ? "text-primary" : "text-foreground/60"
-                                }`}
+                              className={`h-4 w-4 ${
+                                isActive ? "text-primary" : "text-foreground/60"
+                              }`}
                             >
                               {item.icon}
                             </span>
-                            <span className="flex-1 text-left">{item.label}</span>
+                            <span className="flex-1 text-left">
+                              {item.label}
+                            </span>
                             {item.badge && (
-                              <Badge 
-  variant="secondary" 
-  className="ml-2 text-xs max-w-[80px] truncate block"
-  title={item.badge} // Good UX: shows full text on hover
->
-  {item.badge}
-</Badge>
+                              <Badge
+                                variant="secondary"
+                                className="ml-2 text-xs max-w-[80px] truncate block"
+                                title={item.badge} // Good UX: shows full text on hover
+                              >
+                                {item.badge}
+                              </Badge>
                             )}
                             {hasChildren &&
                               (isSubmenuOpen ? (
@@ -119,13 +120,17 @@ export default function Sidebar() {
 
                           {hasChildren && (
                             <ul
-                              className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-200 ease-in-out ${isSubmenuOpen
-                                ? "max-h-96 opacity-100"
-                                : "max-h-0 opacity-0 pointer-events-none"
-                                }`}
+                              className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-200 ease-in-out ${
+                                isSubmenuOpen
+                                  ? "max-h-96 opacity-100"
+                                  : "max-h-0 opacity-0 pointer-events-none"
+                              }`}
                             >
                               {item.children
-                                ?.filter((child) => !child.role || userRole === child.role)
+                                ?.filter(
+                                  (child) =>
+                                    !child.role || userRole === child.role
+                                )
                                 .map((child, childIdx) => {
                                   const childIsActive = pathname === child.href;
                                   return (
@@ -133,20 +138,24 @@ export default function Sidebar() {
                                       <Link
                                         href={child.href}
                                         scroll={false}
-                                        className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${childIsActive
-                                          ? "bg-primary/15 text-primary"
-                                          : "text-foreground/80 hover:bg-primary/10 hover:text-foreground"
-                                          }`}
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                                          childIsActive
+                                            ? "bg-primary/15 text-primary"
+                                            : "text-foreground/80 hover:bg-primary/10 hover:text-foreground"
+                                        }`}
                                       >
                                         <span
-                                          className={`h-4 w-4 ${childIsActive
-                                            ? "text-primary"
-                                            : "text-foreground/60"
-                                            }`}
+                                          className={`h-4 w-4 ${
+                                            childIsActive
+                                              ? "text-primary"
+                                              : "text-foreground/60"
+                                          }`}
                                         >
                                           {child.icon}
                                         </span>
-                                        <span className="flex-1">{child.label}</span>
+                                        <span className="flex-1">
+                                          {child.label}
+                                        </span>
                                       </Link>
                                     </li>
                                   );
@@ -167,9 +176,9 @@ export default function Sidebar() {
       <div className="flex flex-col h-full w-72 border-r border-border bg-linear-to-tr from-primary/20 to-background/10">
         <Link href="/home">
           <div className="flex items-center gap-2 px-6 py-4 border-b border-border">
-            
             <span className="font-bold text-lg text-primary ">
-              {process.env.NEXT_PUBLIC_APP_NAME?.charAt(0).toUpperCase()! + process.env.NEXT_PUBLIC_APP_NAME?.slice(1)}
+              {process.env.NEXT_PUBLIC_APP_NAME?.charAt(0).toUpperCase()! +
+                process.env.NEXT_PUBLIC_APP_NAME?.slice(1)}
             </span>
             <span className="text-xs text-foreground/60">
               v{process.env.NEXT_PUBLIC_APP_VERSION}
@@ -227,7 +236,11 @@ export default function Sidebar() {
   return (
     <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden fixed top-4 left-4 z-50"
+        >
           ☰
         </Button>
       </SheetTrigger>
