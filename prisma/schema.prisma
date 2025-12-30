@@ -21,12 +21,29 @@ model User {
   role          Role     @default(USER)
   emailVerified Boolean  @default(false)
 
-  email        String @unique
+  email        String  @unique
   passwordHash String
+  private      Boolean @default(false)
 
-  displayName String?
-  username    String  @unique
-  avatarUrl   String?
+  displayName       String?
+  username          String    @unique
+  avatarUrl         String?   @db.LongText
+  passwordChangedAt DateTime?
+  apiKeys           ApiKey[]
+}
+
+model ApiKey {
+  id           String    @id @default(cuid())
+  keyHash      String    @unique
+  truncatedKey String?
+  name         String
+  lastUsed     DateTime?
+  createdAt    DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 enum Role {

@@ -7,6 +7,7 @@ export interface NavChildItem {
   label: string;
   icon: ReactNode;
   href: string;
+  badge?: string;
   role?: UserRole; // Add role to child items
 }
 

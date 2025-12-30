@@ -83,7 +83,7 @@ export default function Sidebar() {
                             className={`w-full justify-start gap-3 px-3 py-2 rounded-md ${
                               isActive
                                 ? "bg-primary/15 text-primary"
-                                : "text-foreground/80 hover:bg-primary/10! hover:text-foreground"
+                                : "text-foreground/80 hover:text-foreground"
                             }`}
                             onClick={(e) => {
                               e.preventDefault();
@@ -153,9 +153,18 @@ export default function Sidebar() {
                                         >
                                           {child.icon}
                                         </span>
-                                        <span className="flex-1">
+                                        <span className="flex-1 truncate">
                                           {child.label}
                                         </span>
+                                        {child.badge && (
+                                          <Badge
+                                            variant="secondary"
+                                            className="ml-auto text-xs max-w-[60px] truncate"
+                                            title={child.badge}
+                                          >
+                                            {child.badge}
+                                          </Badge>
+                                        )}
                                       </Link>
                                     </li>
                                   );
@@ -200,14 +209,14 @@ export default function Sidebar() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={session.user.image ?? ""} alt="User" />
+                  <AvatarImage src={session.user.avatarUrl ?? ""} alt="User" />
                   <AvatarFallback className="bg-muted text-foreground">
-                    {session.user.name?.charAt(0)?.toUpperCase()}
+                    {session.user.username?.charAt(0)?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="text-sm font-medium text-foreground">
-                    {session.user.name}
+                    {session.user.username}
                   </div>
                   <div className="text-xs text-foreground/60">
                     {session.user.email.length > 20
@@ -219,7 +228,7 @@ export default function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-foreground/60 hover:text-foreground hover:bg-primary/10!"
+                className="text-foreground/60 hover:text-foreground"
                 onClick={async () => await signOut()}
               >
                 <LogOut className="h-4 w-4" />

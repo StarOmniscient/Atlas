@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/navbar/Sidebar"; 
+import Sidebar from "@/components/navbar/Sidebar";
 import { Providers } from "./providers";
 import { auth } from "@/lib/auth";
 
@@ -17,19 +17,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Template",
+  title: "Atlas",
   description: "Template by Runerra",
 };
-
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  const session = await auth()
-
+  const session = await auth();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -39,9 +36,7 @@ export default async function RootLayout({
         <Providers>
           <div className="flex h-screen">
             {session ? <Sidebar /> : null}
-            <main className="flex-1 overflow-y-auto p-6">
-              {children}
-            </main>
+            <main className="flex-1 overflow-y-auto p-6">{children}</main>
           </div>
         </Providers>
       </body>

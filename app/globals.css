@@ -67,10 +67,32 @@
   --sidebar-border: oklch(0.9 0.02 260);
   --sidebar-ring: oklch(0.5 0.2 285);
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.5 0.2 285), oklch(0.6 0.15 320));
+  --gradient-primary: linear-gradient(
+    135deg,
+    oklch(0.5 0.2 285),
+    oklch(0.6 0.15 320)
+  );
   --gradient-card: linear-gradient(160deg, oklch(1 0 0), oklch(0.97 0.01 260));
-  --gradient-sidebar: linear-gradient(180deg, oklch(0.98 0.01 260), oklch(0.95 0.02 260));
-  --gradient-accent: radial-gradient(circle at 30% 30%, oklch(0.65 0.18 200 / 0.15), transparent 70%);
+  --gradient-sidebar: linear-gradient(
+    180deg,
+    oklch(0.98 0.01 260),
+    oklch(0.95 0.02 260)
+  );
+  --gradient-accent: radial-gradient(
+    circle at 30% 30%,
+    oklch(0.65 0.18 200 / 0.15),
+    transparent 70%
+  );
+
+  /* Star Background */
+  --star-color: oklch(0% 0 0);
+  --gradient-from: oklch(19.83% 0.06311 287.571 / 0.1);
+  --gradient-to: oklch(19.83% 0.06311 287.571 / 0.1);
+
+  /* Star Card */
+  --star-card-bg: oklch(91.887% 0.0001 271.152);
+  --star-card-border: oklch(0.9 0.02 260);
+  --star-card-border-hover: oklch(0.8 0.02 260);
 }
 
 /* Dark Mode: "Deep Space" */
@@ -81,30 +103,30 @@
   --card-foreground: oklch(0.95 0.02 260);
   --popover: oklch(0.1 0.03 260);
   --popover-foreground: oklch(0.95 0.02 260);
-  
+
   --primary: oklch(0.6 0.22 285); /* Nebula Violet */
   --primary-foreground: oklch(0.99 0.01 285);
-  
+
   --secondary: oklch(0.2 0.04 260); /* Meteor Grey */
   --secondary-foreground: oklch(0.95 0.02 260);
-  
+
   --muted: oklch(0.18 0.04 260);
   --muted-foreground: oklch(0.65 0.05 260);
-  
+
   --accent: oklch(0.75 0.15 190); /* Supernova Cyan */
   --accent-foreground: oklch(0.1 0.05 190);
-  
+
   --destructive: oklch(0.55 0.22 25); /* Mars Red */
   --border: oklch(1 0 0 / 15%); /* Faint starlight border */
   --input: oklch(1 0 0 / 10%);
   --ring: oklch(0.6 0.22 285);
-  
+
   --chart-1: oklch(0.6 0.22 285);
   --chart-2: oklch(0.75 0.15 190);
   --chart-3: oklch(0.65 0.18 330);
   --chart-4: oklch(0.85 0.15 90);
   --chart-5: oklch(0.55 0.2 160);
-  
+
   --sidebar: oklch(0.05 0.02 260);
   --sidebar-foreground: oklch(0.95 0.02 260);
   --sidebar-primary: oklch(0.6 0.22 285);
@@ -117,8 +139,8 @@
   /* Gradients – Space */
   --gradient-primary: linear-gradient(
     135deg,
-    oklch(0.6 0.22 285), /* Nebula */
-    oklch(0.45 0.25 320)  /* Deep Space Pink */
+    oklch(0.6 0.22 285),
+    /* Nebula */ oklch(0.45 0.25 320) /* Deep Space Pink */
   );
   --gradient-card: linear-gradient(
     160deg,
@@ -135,6 +157,16 @@
     oklch(0.75 0.15 190 / 0.2),
     transparent 70%
   );
+
+  /* Star Background */
+  --star-color: white;
+  --gradient-from: rgba(99, 102, 241, 0.1);
+  --gradient-to: rgba(168, 85, 247, 0.1);
+
+  /* Star Card */
+  --star-card-bg: rgba(0, 0, 0, 0.4);
+  --star-card-border: oklch(0.2 0.04 260);
+  --star-card-border-hover: oklch(0.3 0.04 260);
 }
 
 @theme inline {

@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
-import prisma from "@/lib/prisma"; // adjust path if needed
+import prisma from "@/lib/prisma"; 
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -38,10 +38,12 @@ export const authOptions = {
         // return user object for JWT
         return {
           id: user.id,
-          name: user.username,
+          username: user.username, // map db username to user.username
+          displayName: user.displayName, 
           email: user.email,
-          image: user.avatarUrl,
-          role: user.role
+          avatarUrl: user.avatarUrl, // map db avatarUrl to user.avatarUrl
+          role: user.role,
+          passwordChangedAt: user.passwordChangedAt
         };
       },
     }),
@@ -52,27 +54,49 @@ export const authOptions = {
   },
 
   session: {
-    strategy: "jwt" as const,
+    strategy: "jwt",
   },
 
   callbacks: {
-    async jwt({ token, user }: { token: any; user: any }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session) {
+        // Handle session updates (e.g. from client side update())
+        if (session.displayName) token.displayName = session.displayName;
+        if (session.avatarUrl || session.avatarUrl === null) token.avatarUrl = session.avatarUrl;
+        if (session.username) token.username = session.username;
+        if (session.email) token.email = session.email;
+      }
+      
       if (user) {
-      token.id = user.id;
-      token.name = user.name;
-      token.image = user.image; // pass image to JWT
-      token.role = user.role
-    }
-    return token;
+        token.id = user.id;
+        token.username = user.username;
+        token.displayName = user.displayName;
+        token.avatarUrl = user.avatarUrl;
+        token.role = user.role;
+        // Store passwordChangedAt timestamp
+        token.passwordChangedAt = user.passwordChangedAt ? Math.floor(user.passwordChangedAt.getTime() / 1000) : null;
+      }
+
+      // Check if password has changed since token issue
+      if (token.passwordChangedAt && token.iat) {
+        // Allow for a small clock drift or processing delay (e.g. 1 second)
+        // If token issued BEFORE password change, it's invalid
+        if (token.iat < token.passwordChangedAt) {
+           return Promise.reject(new Error("Token expired due to password change"));
+        }
+      }
+
+      return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
-      if (token?.id) {
-      session.user.id = token.id;
-      session.user.name = token.name;
-      session.user.image = token.image; // make image available in session
-      session.user.role = token.role
-    }
-    return session;
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.username = token.username;
+        session.user.displayName = token.displayName as string | null;
+        session.user.avatarUrl = token.avatarUrl as string | null;
+        session.user.role = token.role as string;
+      }
+      return session;
     },
   },
 

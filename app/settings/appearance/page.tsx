@@ -5,311 +5,619 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { THEMES } from "@/app/themes";
 import type { UserTheme } from "@/types/usertheme";
-import { X } from "lucide-react";
+import { X, Plus, Edit2, Check } from "lucide-react";
 import ThemeEditorModal from "@/components/settings/ThemeEditorModal";
-
+import {
+  StarCard,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/StarCard";
 
 interface ThemeDescriptor {
-	key: string;
-	name: string;
-	type: "System" | "User";
-	css?: string;
+  key: string;
+  name: string;
+  type: string;
+  css?: string;
+  id?: string;
 }
 
-type GroupedThemes = Record<"System" | "User", ThemeDescriptor[]>;
-
-
+type GroupedThemes = Record<string, ThemeDescriptor[]>;
 
 const ColorSwatch = ({ color, label }: { color: string; label: string }) => {
-	return (
-		<div className="flex flex-col items-center">
-			<div
-				className="w-5 h-5 sm:w-6 sm:h-6 rounded-sm border border-border"
-				style={{ backgroundColor: color }}
-				title={color}
-			/>
-			<span className="text-[10px] sm:text-xs mt-1">{label}</span>
-		</div>
-	);
+  return (
+    <div className="flex flex-col items-center group/swatch">
+      <div
+        className="w-8 h-8 rounded-md border border-border transition-transform group-hover/swatch:scale-110 shadow-sm"
+        style={{ backgroundColor: color }}
+        title={color}
+      />
+      <span className="text-[10px] text-muted-foreground mt-1 opacity-0 group-hover/swatch:opacity-100 transition-opacity absolute -bottom-4 bg-background px-1 rounded shadow-sm z-10 whitespace-nowrap">
+        {label}
+      </span>
+    </div>
+  );
 };
 
 const getThemeColor = (themeClass: string, colorVar: string): string => {
-	const tempElement = document.createElement("div");
-	tempElement.className = themeClass;
-	tempElement.style.position = "absolute";
-	tempElement.style.visibility = "hidden";
-	document.body.appendChild(tempElement);
+  const tempElement = document.createElement("div");
+  tempElement.className = themeClass;
+  tempElement.style.position = "absolute";
+  tempElement.style.visibility = "hidden";
+  document.body.appendChild(tempElement);
 
-	const computedStyle = getComputedStyle(tempElement);
-	const colorValue = computedStyle.getPropertyValue(colorVar).trim();
+  const computedStyle = getComputedStyle(tempElement);
+  const colorValue = computedStyle.getPropertyValue(colorVar).trim();
 
-	document.body.removeChild(tempElement);
-	return colorValue || "transparent";
+  document.body.removeChild(tempElement);
+  return colorValue || "transparent";
 };
 
-const getTextColorForTheme = (themeClass: string): string => {
-	const tempElement = document.createElement("div");
-	tempElement.className = themeClass;
-	tempElement.style.position = "absolute";
-	tempElement.style.visibility = "hidden";
-	document.body.appendChild(tempElement);
+const ThemeSection = ({
+  title,
+  description,
+  themes,
+  currentTheme,
+  themeColors,
+  onSwitch,
+}: {
+  title: string;
+  description: string;
+  themes: ThemeDescriptor[] | undefined;
+  currentTheme: string | undefined;
+  themeColors: Record<string, any>;
+  onSwitch: (key: string) => void;
+}) => {
+  if (!themes || themes.length === 0) return null;
 
-	const computedStyle = getComputedStyle(tempElement);
-	const bgColorValue = computedStyle.getPropertyValue("--background").trim();
-	document.body.removeChild(tempElement);
+  return (
+    <StarCard>
+      <CardHeader>
+        <div className="space-y-1.5">
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {themes.map(({ key, name }: ThemeDescriptor) => {
+            const isCurrent = currentTheme === key;
+            const colors = themeColors[key];
 
-	const match = bgColorValue.match(/oklch\(\s*([\d.]+)\s+/);
-	if (match) {
-		const lightness = parseFloat(match[1]);
-		return lightness > 0.5 ? "text-foreground" : "text-white";
-	}
-	return "text-foreground";
+            // Fallback colors if loading
+            const bg = colors?.background || "hsl(var(--background))";
+            const prim = colors?.primary || "hsl(var(--primary))";
+            const sec = colors?.secondary || "hsl(var(--secondary))";
+            const acc = colors?.accent || "hsl(var(--accent))";
+
+            return (
+              <div
+                key={name}
+                onClick={() => onSwitch(key)}
+                className={`
+                    group/theme cursor-pointer relative flex flex-col gap-3
+                `}
+              >
+                {/* Visual Preview Container */}
+                <div
+                  className={`
+                        relative w-full aspect-16/10 rounded-xl overflow-hidden border-2 transition-all duration-300 shadow-md
+                        ${
+                          isCurrent
+                            ? "border-primary ring-4 ring-primary/20 scale-[1.02]"
+                            : "border-border/50 group-hover/theme:border-primary/50 group-hover/theme:shadow-lg group-hover/theme:-translate-y-1"
+                        }
+                    `}
+                  style={{ backgroundColor: bg }}
+                >
+                  {/* Mini Layout Simulation */}
+                  <div className="absolute inset-0 flex">
+                    {/* Sidebar */}
+                    <div
+                      className="w-1/4 h-full border-r border-white/10 flex flex-col gap-2 p-2"
+                      style={{ backgroundColor: sec }}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-white/10 mb-2" />
+                      <div className="w-full h-2 rounded-full bg-white/10" />
+                      <div className="w-3/4 h-2 rounded-full bg-white/10" />
+                      <div className="w-full h-2 rounded-full bg-white/10 mt-auto" />
+                    </div>
+                    {/* Main Content */}
+                    <div className="flex-1 flex flex-col">
+                      {/* Header */}
+                      <div className="h-8 border-b border-white/5 flex items-center px-3 gap-2">
+                        <div className="w-16 h-2 rounded-full bg-current opacity-10" />
+                      </div>
+                      {/* Body */}
+                      <div className="flex-1 p-3 gap-2 flex flex-col">
+                        <div className="w-full h-24 rounded-lg border border-white/10 flex items-center justify-center relative overflow-hidden">
+                          {/* Accent usage */}
+                          <div
+                            className="absolute inset-0 opacity-10"
+                            style={{ backgroundColor: acc }}
+                          />
+                          <div className="w-1/2 h-2 rounded-full opacity-20 bg-current" />
+                        </div>
+                        <div className="flex gap-2 mt-auto">
+                          <div
+                            className="flex-1 h-8 rounded-md"
+                            style={{ backgroundColor: prim }}
+                          />
+                          <div className="w-8 h-8 rounded-md border border-white/10" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Active Check Overlay */}
+                  {isCurrent && (
+                    <div className="absolute inset-0 bg-primary/10 flex items-center justify-center backdrop-blur-[1px]">
+                      <div className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg animate-in zoom-in">
+                        <Check className="w-5 h-5" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer Info */}
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex flex-col">
+                    <span
+                      className={`font-semibold text-sm ${
+                        isCurrent ? "text-primary" : "text-foreground"
+                      }`}
+                    >
+                      {name}
+                    </span>
+                    {/* Colors */}
+                    {/* <div className="flex gap-1 mt-1.5">
+                      <div
+                        className="w-3 h-3 rounded-full border border-white/20"
+                        style={{ backgroundColor: prim }}
+                        title="Primary"
+                      />
+                      <div
+                        className="w-3 h-3 rounded-full border border-white/20"
+                        style={{ backgroundColor: sec }}
+                        title="Secondary"
+                      />
+                      <div
+                        className="w-3 h-3 rounded-full border border-white/20"
+                        style={{ backgroundColor: acc }}
+                        title="Accent"
+                      />
+                    </div> */}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </StarCard>
+  );
 };
 
 export default function AppearanceSettings() {
-	const { theme, setTheme } = useTheme();
-	const [themeColors, setThemeColors] = useState<Record<string, { primary: string; secondary: string; accent: string; background: string }>>({});
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [editingTheme, setEditingTheme] = useState<UserTheme | null>(null);
-	const [refreshColors, setRefreshColors] = useState(0);
-	const [allThemes, setAllThemes] = useState<any[]>([]);
-	const [injectedClass, setInjectedClass] = useState<string | null>(null);
-	const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [themeColors, setThemeColors] = useState<
+    Record<
+      string,
+      { primary: string; secondary: string; accent: string; background: string }
+    >
+  >({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTheme, setEditingTheme] = useState<UserTheme | null>(null);
+  const [refreshColors, setRefreshColors] = useState(0);
+  const [allThemes, setAllThemes] = useState<any[]>([]);
+  const [injectedClass, setInjectedClass] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-	useEffect(() => {
-		setMounted(true);
-	}, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-	useEffect(() => {
-		const fetchColors = () => {
-			const colors: Record<string, { primary: string; secondary: string; accent: string; background: string }> = {};
-			const userThemes = JSON.parse(localStorage.getItem("user-themes") || "[]").map((theme: UserTheme) => {
-				const match = theme.css.match(/\.([^\s{]+)/);
-				return { name: theme.name, key: match ? match[1] : null, type: "User", css: theme.css };
-			});
-			const all = [...THEMES, ...userThemes];
-			setAllThemes(all);
+  useEffect(() => {
+    const fetchColors = () => {
+      const colors: Record<
+        string,
+        {
+          primary: string;
+          secondary: string;
+          accent: string;
+          background: string;
+        }
+      > = {};
+      const userThemes = JSON.parse(
+        localStorage.getItem("user-themes") || "[]"
+      ).map((theme: UserTheme) => {
+        const match = theme.css.match(/\.([^\s{]+)/);
+        return {
+          name: theme.name,
+          key: match ? match[1] : null,
+          type: "User",
+          css: theme.css,
+          id: theme.id,
+        };
+      });
+      const all = [...THEMES, ...userThemes];
+      setAllThemes(all);
 
-			all.forEach(({ key, css }) => {
-				let tempStyle: HTMLStyleElement | null = null;
-				if (css && key?.startsWith("user-")) {
-					tempStyle = document.createElement("style");
-					tempStyle.id = `temp-user-theme-${key}`;
-					tempStyle.textContent = css;
-					document.head.appendChild(tempStyle);
-				}
+      all.forEach(({ key, css }) => {
+        let tempStyle: HTMLStyleElement | null = null;
+        if (css && key?.startsWith("user-")) {
+          tempStyle = document.createElement("style");
+          tempStyle.id = `temp-user-theme-${key}`;
+          tempStyle.textContent = css;
+          document.head.appendChild(tempStyle);
+        }
 
-				colors[key] = {
-					primary: getThemeColor(key, "--primary"),
-					secondary: getThemeColor(key, "--secondary"),
-					accent: getThemeColor(key, "--accent"),
-					background: getThemeColor(key, "--background"),
-				};
+        colors[key] = {
+          primary: getThemeColor(key, "--primary"),
+          secondary: getThemeColor(key, "--secondary"),
+          accent: getThemeColor(key, "--accent"),
+          background: getThemeColor(key, "--background"),
+        };
 
-				if (tempStyle) {
-					document.head.removeChild(tempStyle);
-				}
-			});
+        if (tempStyle) {
+          document.head.removeChild(tempStyle);
+        }
+      });
 
-			setThemeColors(colors);
-		};
+      setThemeColors(colors);
+    };
 
-		fetchColors();
-	}, [refreshColors]);
+    fetchColors();
+  }, [refreshColors]);
 
-	const switchTheme = (key: string) => {
-		const userTheme = allThemes.find((t) => t.key === key && t.type === "User");
-		if (userTheme) {
-			const classMatch = userTheme.css.match(/\.([^\s{]+)/);
-			const className = classMatch ? classMatch[1] : key;
+  const switchTheme = (key: string) => {
+    const userTheme = allThemes.find((t) => t.key === key && t.type === "User");
+    if (userTheme) {
+      const classMatch = userTheme.css.match(/\.([^\s{]+)/);
+      const className = classMatch ? classMatch[1] : key;
 
-			if (!document.getElementById(`user-theme-${className}`)) {
-				const style = document.createElement("style");
-				style.id = `user-theme-${className}`;
-				style.textContent = userTheme.css;
-				document.head.appendChild(style);
-			}
+      if (!document.getElementById(`user-theme-${className}`)) {
+        const style = document.createElement("style");
+        style.id = `user-theme-${className}`;
+        style.textContent = userTheme.css;
+        document.head.appendChild(style);
+      }
 
-			if (injectedClass && injectedClass !== className) {
-				const old = document.getElementById(`user-theme-${injectedClass}`);
-				if (old) old.remove();
-			}
+      if (injectedClass && injectedClass !== className) {
+        const old = document.getElementById(`user-theme-${injectedClass}`);
+        if (old) old.remove();
+      }
 
-			document.documentElement.className = className;
-			setInjectedClass(className);
-			setTheme(className);
-		} else {
-			if (injectedClass) {
-				const el = document.getElementById(`user-theme-${injectedClass}`);
-				if (el) el.remove();
-				setInjectedClass(null);
-			}
-			setTheme(key);
-		}
-	};
+      document.documentElement.className = className;
+      setInjectedClass(className);
+      setTheme(className);
+    } else {
+      if (injectedClass) {
+        const el = document.getElementById(`user-theme-${injectedClass}`);
+        if (el) el.remove();
+        setInjectedClass(null);
+      }
+      setTheme(key);
+    }
+  };
 
-	const groupedThemes = allThemes.reduce((acc, t) => {
-		if (!acc[t.type]) acc[t.type] = [];
-		acc[t.type].push(t);
-		return acc;
-	}, {} as GroupedThemes);
+  const groupedThemes = allThemes.reduce((acc, t) => {
+    if (!acc[t.type]) acc[t.type] = [];
+    acc[t.type].push(t);
+    return acc;
+  }, {} as GroupedThemes);
 
-	const handleSaveTheme = (updatedTheme: UserTheme) => {
-		const existingThemes = JSON.parse(localStorage.getItem("user-themes") || "[]");
-		const themesArray = Array.isArray(existingThemes) ? existingThemes : [];
+  const handleSaveTheme = (updatedTheme: UserTheme) => {
+    const existingThemes = JSON.parse(
+      localStorage.getItem("user-themes") || "[]"
+    );
+    const themesArray = Array.isArray(existingThemes) ? existingThemes : [];
 
-		const classMatch = updatedTheme.css.match(/\.([^\s{]+)/);
-		const originalClass = classMatch ? classMatch[1] : updatedTheme.name.replace(/\s+/g, "-").toLowerCase();
-		const newClass = `user-${originalClass}`;
-		const newCss = updatedTheme.css.replace(/\.([^\s{]+)/, `.${newClass}`);
-		const themeToSave = { ...updatedTheme, key: newClass, css: newCss };
+    // Use existing ID or generate a new one
+    const id = updatedTheme.id || crypto.randomUUID();
 
-		const index = themesArray.findIndex((t) => t.name === updatedTheme.name);
-		if (index >= 0) themesArray[index] = themeToSave;
-		else themesArray.push(themeToSave);
+    // Generate class name based on ID to ensure uniqueness
+    const newClass = `user-theme-${id}`;
 
-		localStorage.setItem("user-themes", JSON.stringify(themesArray));
-		setRefreshColors((prev) => prev + 1);
-		setIsModalOpen(false);
-		setEditingTheme(null);
-	};
+    // Replace the old class name in the CSS with the new ID-based class
+    // This matches .user-xyz { ... } or .user-theme-abc { ... }
+    const newCss = updatedTheme.css.replace(/\.([^\s{]+)/, `.${newClass}`);
 
-	return (
-		<div className="space-y-6 px-2 sm:px-0">
-			<p className="text-lg font-medium text-center sm:text-left">
-				Current Theme:{" "}
-				<span className="font-semibold">
-					{mounted ? (THEMES.find((t) => t.key === theme)?.name || theme) : "Loading..."}
-				</span>
-			</p>
+    const themeToSave = {
+      ...updatedTheme,
+      id,
+      key: newClass,
+      css: newCss,
+    };
 
-			{Object.entries(groupedThemes).map(([type, themes]: any) => (
-				<div key={type} className="space-y-2">
-					<h2 className="text-lg sm:text-xl font-semibold capitalize">{type} Themes</h2>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-						{themes.map(({ key, name }: ThemeDescriptor) => {
-							const isCurrent = theme === key;
-							const colors = themeColors[key];
-							const textColorClass = colors ? getTextColorForTheme(key) : "text-foreground";
+    const index = themesArray.findIndex((t) => t.id === id);
+    if (index >= 0) {
+      themesArray[index] = themeToSave;
+    } else {
+      // Fallback: check by name if ID match failed (legacy themes) but update them with ID
+      const nameIndex = themesArray.findIndex(
+        (t) => t.name === updatedTheme.name
+      );
+      if (nameIndex >= 0) {
+        themesArray[nameIndex] = themeToSave;
+      } else {
+        themesArray.push(themeToSave);
+      }
+    }
 
-							return (
-								<div
-									key={key}
-									className={`group border rounded-lg p-2 flex flex-col relative text-sm ${isCurrent
-											? "ring-2 ring-ring ring-offset-2"
-											: "border-border hover:border-destructive/30"
-										}`}
-								>
-									{type === "User" && (
-										<button
-											onClick={(e) => {
-												e.stopPropagation();
-												if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    localStorage.setItem("user-themes", JSON.stringify(themesArray));
+    setRefreshColors((prev) => prev + 1);
+    setIsModalOpen(false);
+    setEditingTheme(null);
+  };
 
-												const existingThemes = JSON.parse(localStorage.getItem("user-themes") || "[]") as UserTheme[];
-												const updatedThemes = existingThemes.filter((t) => t.name !== name);
-												localStorage.setItem("user-themes", JSON.stringify(updatedThemes));
+  return (
+    <div className="space-y-8 max-w-5xl mx-auto py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Appearance</h1>
+          <p className="text-muted-foreground">
+            Customize the look and feel of your workspace.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full border bg-card/50 backdrop-blur-sm">
+          <span className="text-sm text-muted-foreground">Current Theme:</span>
+          <span className="font-semibold text-primary">
+            {mounted
+              ? THEMES.find((t) => t.key === theme)?.name || theme
+              : "Loading..."}
+          </span>
+        </div>
+      </div>
 
-												const themeToDelete = allThemes.find((t) => t.key === key && t.type === "User");
-												if (themeToDelete) {
-													const classMatch = themeToDelete.css.match(/\.([^\s{]+)/);
-													const className = classMatch ? classMatch[1] : key;
+      <ThemeSection
+        title="Light Themes"
+        description="Bright and clear themes."
+        themes={groupedThemes.light}
+        currentTheme={theme}
+        themeColors={themeColors}
+        onSwitch={switchTheme}
+      />
 
-													const styleTag = document.getElementById(`user-theme-${className}`);
-													if (styleTag) styleTag.remove();
+      <ThemeSection
+        title="Dark Themes"
+        description="Easy on the eyes."
+        themes={groupedThemes.dark}
+        currentTheme={theme}
+        themeColors={themeColors}
+        onSwitch={switchTheme}
+      />
 
-													if (isCurrent) setTheme("dark");
-													if (injectedClass === className) setInjectedClass(null);
-												}
+      {/* User Themes */}
+      <StarCard>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="space-y-1.5">
+            <CardTitle>My Themes</CardTitle>
+            <CardDescription>Custom themes you have created.</CardDescription>
+          </div>
+          <Button
+            onClick={() => {
+              setEditingTheme(null);
+              setIsModalOpen(true);
+            }}
+            size="sm"
+            className="gap-2"
+          >
+            <Plus className="w-4 h-4" /> Create New
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {!groupedThemes.User || groupedThemes.User.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
+              <p>You haven't created any custom themes yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1.5">
+              {groupedThemes.User.map(({ key, name, id }: ThemeDescriptor) => {
+                const isCurrent = theme === key;
+                const colors = themeColors[key];
 
-												setRefreshColors((prev) => prev + 1);
-											}}
-											className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-destructive hover:text-destructive/80 rounded-full hover:bg-destructive/10"
-											aria-label="Delete theme"
-										>
-											<X className="w-3 h-3 sm:w-4 sm:h-4" />
-										</button>
-									)}
+                // Fallback colors if loading
+                const bg = colors?.background || "hsl(var(--background))";
+                const prim = colors?.primary || "hsl(var(--primary))";
+                const sec = colors?.secondary || "hsl(var(--secondary))";
+                const acc = colors?.accent || "hsl(var(--accent))";
 
-									<div className="flex justify-between items-start mb-1">
-										<h3 className={`${textColorClass} font-medium text-xs sm:text-sm truncate`}>
-											{name}
-										</h3>
-										<div className="flex gap-1 mt-1 flex-wrap justify-end">
-											{type === "User" && (
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() => {
-														const themeToEdit = allThemes.find((t) => t.key === key && t.type === "User");
-														if (themeToEdit) {
-															setEditingTheme({
-																name: themeToEdit.name,
-																css: themeToEdit.css,
-																id: themeToEdit.id,
-															});
-															setIsModalOpen(true);
-														}
-													}}
-													className="text-[10px] sm:text-xs px-2 py-1"
-												>
-													Edit
-												</Button>
-											)}
+                return (
+                  <div
+                    key={id || key}
+                    onClick={() => switchTheme(key)}
+                    className={`
+                        group/theme cursor-pointer relative flex flex-col gap-3
+                    `}
+                  >
+                    {/* Visual Preview Container */}
+                    <div
+                      className={`
+                            relative w-full aspect-16/10 rounded-xl overflow-hidden border-2 transition-all duration-300 shadow-md
+                            ${
+                              isCurrent
+                                ? "border-primary ring-4 ring-primary/20 scale-[1.02]"
+                                : "border-border/50 group-hover/theme:border-primary/50 group-hover/theme:shadow-lg group-hover/theme:-translate-y-1"
+                            }
+                        `}
+                      style={{ backgroundColor: bg }}
+                    >
+                      {/* Mini Layout Simulation */}
+                      <div className="absolute inset-0 flex">
+                        {/* Sidebar */}
+                        <div
+                          className="w-1/4 h-full border-r border-white/10 flex flex-col gap-2 p-2"
+                          style={{ backgroundColor: sec }}
+                        >
+                          <div className="w-8 h-8 rounded-full bg-white/10 mb-2" />
+                          <div className="w-full h-2 rounded-full bg-white/10" />
+                          <div className="w-3/4 h-2 rounded-full bg-white/10" />
+                          <div className="w-full h-2 rounded-full bg-white/10 mt-auto" />
+                        </div>
+                        {/* Main Content */}
+                        <div className="flex-1 flex flex-col">
+                          {/* Header */}
+                          <div className="h-8 border-b border-white/5 flex items-center px-3 gap-2">
+                            <div className="w-16 h-2 rounded-full bg-current opacity-10" />
+                          </div>
+                          {/* Body */}
+                          <div className="flex-1 p-3 gap-2 flex flex-col">
+                            <div className="w-full h-24 rounded-lg border border-white/10 flex items-center justify-center relative overflow-hidden">
+                              {/* Accent usage */}
+                              <div
+                                className="absolute inset-0 opacity-10"
+                                style={{ backgroundColor: acc }}
+                              />
+                              <div className="w-1/2 h-2 rounded-full opacity-20 bg-current" />
+                            </div>
+                            <div className="flex gap-2 mt-auto">
+                              <div
+                                className="flex-1 h-8 rounded-md"
+                                style={{ backgroundColor: prim }}
+                              />
+                              <div className="w-8 h-8 rounded-md border border-white/10" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-											<Button
-												variant={isCurrent ? "secondary" : "outline"}
-												size="sm"
-												onClick={() => switchTheme(key)}
-												className="text-[10px] sm:text-xs px-2 py-1"
-												disabled={!colors}
-											>
-												{isCurrent ? "Active" : "Apply"}
-											</Button>
-										</div>
-									</div>
+                      {/* Active Check Overlay */}
+                      {isCurrent && (
+                        <div className="absolute inset-0 bg-primary/10 flex items-center justify-center backdrop-blur-[1px] pointer-events-none">
+                          <div className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg animate-in zoom-in">
+                            <Check className="w-5 h-5" />
+                          </div>
+                        </div>
+                      )}
 
-									{colors && (
-										<div className="flex space-x-1 sm:space-x-2 justify-center mt-auto">
-											<ColorSwatch color={colors.primary} label="Primary" />
-											<ColorSwatch color={colors.secondary} label="Secondary" />
-											<ColorSwatch color={colors.accent} label="Accent" />
-										</div>
-									)}
-									{!colors && (
-										<div className="flex justify-center items-center mt-auto h-6">
-											<span className="text-xs text-muted-foreground">Loading...</span>
-										</div>
-									)}
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			))}
+                      {/* Hover Actions Overlay */}
+                      <div className="absolute inset-0 opacity-0 group-hover/theme:opacity-100 transition-opacity bg-black/20 flex items-center justify-center gap-2 backdrop-blur-[1px]">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="h-9 w-9 p-0 rounded-full shadow-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const themeToEdit = allThemes.find(
+                              (t) => t.key === key && t.type === "User"
+                            );
+                            if (themeToEdit) {
+                              setEditingTheme({
+                                name: themeToEdit.name,
+                                css: themeToEdit.css,
+                                id: themeToEdit.id,
+                              });
+                              setIsModalOpen(true);
+                            }
+                          }}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="h-9 w-9 p-0 rounded-full shadow-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (
+                              !confirm(
+                                `Are you sure you want to delete "${name}"?`
+                              )
+                            )
+                              return;
 
-			<div className="flex justify-center sm:justify-start">
-				<Button
-					onClick={() => {
-						setEditingTheme(null);
-						setIsModalOpen(true);
-					}}
-					className="text-sm px-3 py-1"
-				>
-					Create New Theme
-				</Button>
-			</div>
+                            const existingThemes = JSON.parse(
+                              localStorage.getItem("user-themes") || "[]"
+                            ) as UserTheme[];
+                            const updatedThemes = existingThemes.filter(
+                              (t) => t.name !== name
+                            );
+                            localStorage.setItem(
+                              "user-themes",
+                              JSON.stringify(updatedThemes)
+                            );
 
-			<ThemeEditorModal
-				key={isModalOpen ? (editingTheme ? `edit-${editingTheme.name}` : "create") : "closed"}
-				theme={editingTheme}
-				isOpen={isModalOpen}
-				onClose={() => {
-					setIsModalOpen(false);
-					setEditingTheme(null);
-				}}
-				onSave={handleSaveTheme}
-			/>
-		</div>
-	);
+                            const themeToDelete = allThemes.find(
+                              (t) => t.key === key && t.type === "User"
+                            );
+                            if (themeToDelete) {
+                              const classMatch =
+                                themeToDelete.css.match(/\.([^\s{]+)/);
+                              const className = classMatch
+                                ? classMatch[1]
+                                : key;
+                              const styleTag = document.getElementById(
+                                `user-theme-${className}`
+                              );
+                              if (styleTag) styleTag.remove();
+                              if (isCurrent) setTheme("dark");
+                              if (injectedClass === className)
+                                setInjectedClass(null);
+                            }
+                            setRefreshColors((prev) => prev + 1);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Footer Info */}
+                    <div className="flex items-center justify-between px-1">
+                      <div className="flex flex-col">
+                        <span
+                          className={`font-semibold text-sm ${
+                            isCurrent ? "text-primary" : "text-foreground"
+                          }`}
+                        >
+                          {name}
+                        </span>
+                        {/* Colors */}
+                        {/* <div className="flex gap-1 mt-1.5">
+                          <div
+                            className="w-3 h-3 rounded-full border border-white/20"
+                            style={{ backgroundColor: prim }}
+                            title="Primary"
+                          />
+                          <div
+                            className="w-3 h-3 rounded-full border border-white/20"
+                            style={{ backgroundColor: sec }}
+                            title="Secondary"
+                          />
+                          <div
+                            className="w-3 h-3 rounded-full border border-white/20"
+                            style={{ backgroundColor: acc }}
+                            title="Accent"
+                          />
+                        </div> */}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </StarCard>
+
+      <ThemeEditorModal
+        key={
+          isModalOpen
+            ? editingTheme
+              ? `edit-${editingTheme.name}`
+              : "create"
+            : "closed"
+        }
+        theme={editingTheme}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingTheme(null);
+        }}
+        onSave={handleSaveTheme}
+      />
+    </div>
+  );
 }

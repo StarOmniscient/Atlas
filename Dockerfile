@@ -17,23 +17,22 @@ ENV DB_DATABASE=""
 ENV DB_TYPE="mysql"
 ENV DATABASE_URL="${DB_TYPE}://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_DATABASE}"
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+
 
 # Copy dependency files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN npm install --frozen-lockfile
 
 # Copy application source
 COPY . .
 
 # Prisma setup
-RUN pnpx prisma migrate deploy
-RUN pnpx prisma generate
+RUN npx prisma migrate deploy
+RUN npx prisma generate
 
 # Build Next.js app
-RUN pnpm run build
+RUN npm run build
 
-CMD ["pnpm", "start"]
+CMD ["npm", "start"]
