@@ -6,6 +6,8 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { ReactNode, useEffect } from "react";
 import { THEMES } from "./themes";
 import type { UserTheme } from "@/types/usertheme";
+import { NavigationProvider } from "@/context/NavigationContext";
+
 
 
 function UserThemeInjector() {
@@ -48,15 +50,17 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <SessionProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        themes={allThemeKeys}
-      >
-        {children}
-        <UserThemeInjector />
-      </ThemeProvider>
+      <NavigationProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          themes={allThemeKeys}
+        >
+          {children}
+          <UserThemeInjector />
+        </ThemeProvider>
+      </NavigationProvider>
     </SessionProvider>
   );
 }

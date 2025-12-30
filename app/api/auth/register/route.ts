@@ -2,6 +2,12 @@ import { hash } from "bcrypt"
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 
+const hasAdmin = await prisma.user.findFirst({
+          where: {
+            role: "ADMIN"
+          }
+        })
+
 export async function POST(req: Request) {
     const { email, password, username } = await req.json()
 
@@ -9,7 +15,6 @@ export async function POST(req: Request) {
     if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{16,}$/.test(password)) {
         return NextResponse.json({ error: "Password does not meet requirements" }, { status: 400 })
     }
-
 
     try {
         const hashedPassword = await hash(password, 10)
@@ -19,6 +24,7 @@ export async function POST(req: Request) {
                 email,
                 passwordHash: hashedPassword,
                 username: username,
+                role: hasAdmin ? "USER" : "ADMIN"
             },
         }).catch(err => {
             console.log(err)

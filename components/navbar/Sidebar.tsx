@@ -4,12 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { navItems } from "@/config/navbarConfig";
-import {
-  ArrowRight,
-  ChevronDown,
-  LogOut,
-} from "lucide-react";
+import { useNavigation } from "@/hooks/useNavigation";
+import { ArrowRight, ChevronDown, LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,6 +15,7 @@ export default function Sidebar() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { navbarConfig } = useNavigation();
 
   const { data: session, status } = useSession();
   const userRole = session?.user?.role;
@@ -26,19 +23,21 @@ export default function Sidebar() {
 
   useEffect(() => {
     const newOpenState: Record<string, boolean> = {};
-    navItems.forEach((section) => {
+
+    navbarConfig.forEach((section) => {
       section.items.forEach((item) => {
         if (item.children) {
           const uniqueKey = `${section.section}-${item.label}`;
           const isChildActive = item.children.some(
-            (child) => pathname === child.href || pathname.startsWith(child.href + "/")
+            (child) =>
+              pathname === child.href || pathname.startsWith(child.href + "/")
           );
           if (isChildActive) newOpenState[uniqueKey] = true;
         }
       });
     });
     setOpenSubmenus(newOpenState);
-  }, [pathname]);
+  }, [pathname, navbarConfig]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -48,7 +47,8 @@ export default function Sidebar() {
   }, []);
 
   const toggleSubmenu = (key: string) => {
-    const currentScroll = document.querySelector(".sidebar-scroll")?.scrollTop ?? 0;
+    const currentScroll =
+      document.querySelector(".sidebar-scroll")?.scrollTop ?? 0;
     setOpenSubmenus((prev) => ({ ...prev, [key]: !prev[key] }));
     requestAnimationFrame(() => {
       const container = document.querySelector(".sidebar-scroll");
@@ -56,11 +56,10 @@ export default function Sidebar() {
     });
   };
 
-
   const SidebarContent = () => {
     const MemoizedSections = useMemo(
       () =>
-        navItems
+        navbarConfig
           .filter((item) => !item.role || userRole === item.role)
           .map((section, sectionIdx) => (
             <div key={sectionIdx} className="mb-6 px-6">
@@ -81,10 +80,11 @@ export default function Sidebar() {
                         <div className="relative">
                           <Button
                             variant="ghost"
-                            className={`w-full justify-start gap-3 px-3 py-2 rounded-md ${isActive
-                              ? "bg-primary/10 text-primary"
-                              : "text-foreground/80 hover:bg-muted/50 hover:text-foreground"
-                              }`}
+                            className={`w-full justify-start gap-3 px-3 py-2 rounded-md ${
+                              isActive
+                                ? "bg-primary/15 text-primary"
+                                : "text-foreground/80 hover:text-foreground"
+                            }`}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -92,14 +92,21 @@ export default function Sidebar() {
                             }}
                           >
                             <span
-                              className={`h-4 w-4 ${isActive ? "text-primary" : "text-foreground/60"
-                                }`}
+                              className={`h-4 w-4 ${
+                                isActive ? "text-primary" : "text-foreground/60"
+                              }`}
                             >
                               {item.icon}
                             </span>
-                            <span className="flex-1 text-left">{item.label}</span>
+                            <span className="flex-1 text-left">
+                              {item.label}
+                            </span>
                             {item.badge && (
-                              <Badge variant="secondary" className="ml-2 text-xs">
+                              <Badge
+                                variant="secondary"
+                                className="ml-2 text-xs max-w-[80px] truncate block"
+                                title={item.badge} // Good UX: shows full text on hover
+                              >
                                 {item.badge}
                               </Badge>
                             )}
@@ -113,13 +120,17 @@ export default function Sidebar() {
 
                           {hasChildren && (
                             <ul
-                              className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-200 ease-in-out ${isSubmenuOpen
-                                ? "max-h-96 opacity-100"
-                                : "max-h-0 opacity-0 pointer-events-none"
-                                }`}
+                              className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-200 ease-in-out ${
+                                isSubmenuOpen
+                                  ? "max-h-96 opacity-100"
+                                  : "max-h-0 opacity-0 pointer-events-none"
+                              }`}
                             >
                               {item.children
-                                ?.filter((child) => !child.role || userRole === child.role)
+                                ?.filter(
+                                  (child) =>
+                                    !child.role || userRole === child.role
+                                )
                                 .map((child, childIdx) => {
                                   const childIsActive = pathname === child.href;
                                   return (
@@ -127,20 +138,33 @@ export default function Sidebar() {
                                       <Link
                                         href={child.href}
                                         scroll={false}
-                                        className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${childIsActive
-                                          ? "bg-primary/10 text-primary"
-                                          : "text-foreground/80 hover:bg-muted/50 hover:text-foreground"
-                                          }`}
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                                          childIsActive
+                                            ? "bg-primary/15 text-primary"
+                                            : "text-foreground/80 hover:bg-primary/10 hover:text-foreground"
+                                        }`}
                                       >
                                         <span
-                                          className={`h-4 w-4 ${childIsActive
-                                            ? "text-primary"
-                                            : "text-foreground/60"
-                                            }`}
+                                          className={`h-4 w-4 ${
+                                            childIsActive
+                                              ? "text-primary"
+                                              : "text-foreground/60"
+                                          }`}
                                         >
                                           {child.icon}
                                         </span>
-                                        <span className="flex-1">{child.label}</span>
+                                        <span className="flex-1 truncate">
+                                          {child.label}
+                                        </span>
+                                        {child.badge && (
+                                          <Badge
+                                            variant="secondary"
+                                            className="ml-auto text-xs max-w-[60px] truncate"
+                                            title={child.badge}
+                                          >
+                                            {child.badge}
+                                          </Badge>
+                                        )}
                                       </Link>
                                     </li>
                                   );
@@ -154,29 +178,16 @@ export default function Sidebar() {
               </ul>
             </div>
           )),
-      [openSubmenus, pathname, userRole]
+      [openSubmenus, pathname, userRole, navbarConfig]
     );
 
     return (
-      <div className="flex flex-col h-full w-72 border-r border-border bg-linear-to-b from-sidebar to-background">
+      <div className="flex flex-col h-full w-72 border-r border-border bg-linear-to-tr from-primary/20 to-background/10">
         <Link href="/home">
           <div className="flex items-center gap-2 px-6 py-4 border-b border-border">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-primary"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <span className="font-bold text-lg text-primary">
-              {process.env.NEXT_PUBLIC_APP_NAME}
+            <span className="font-bold text-lg text-primary ">
+              {process.env.NEXT_PUBLIC_APP_NAME?.charAt(0).toUpperCase()! +
+                process.env.NEXT_PUBLIC_APP_NAME?.slice(1)}
             </span>
             <span className="text-xs text-foreground/60">
               v{process.env.NEXT_PUBLIC_APP_VERSION}
@@ -198,14 +209,14 @@ export default function Sidebar() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={session.user.image ?? ""} alt="User" />
+                  <AvatarImage src={session.user.avatarUrl ?? ""} alt="User" />
                   <AvatarFallback className="bg-muted text-foreground">
-                    {session.user.name?.charAt(0)?.toUpperCase()}
+                    {session.user.username?.charAt(0)?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="text-sm font-medium text-foreground">
-                    {session.user.name}
+                    {session.user.username}
                   </div>
                   <div className="text-xs text-foreground/60">
                     {session.user.email.length > 20
@@ -234,7 +245,11 @@ export default function Sidebar() {
   return (
     <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden fixed top-4 left-4 z-50"
+        >
           ☰
         </Button>
       </SheetTrigger>
