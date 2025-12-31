@@ -17,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useSession, signOut } from "next-auth/react";
+import { useAlert } from "@/context/AlertContext";
 
 interface UserData {
   id: string;
@@ -30,6 +31,7 @@ interface UserData {
 export function AccountSettingsForm({ user }: { user: UserData }) {
   const router = useRouter();
   const { data: session, update } = useSession();
+  const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
   // Avatar State
@@ -89,10 +91,18 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
       await update({ image: updatedUser.avatarUrl }); // Update session
 
       router.refresh();
-      alert("Avatar updated successfully!");
+      showAlert({
+        type: "success",
+        title: "Avatar Updated",
+        message: "Your profile picture has been updated successfully.",
+      });
     } catch (error) {
       console.error(error);
-      alert("Error updating avatar");
+      showAlert({
+        type: "error",
+        title: "Update Failed",
+        message: "Failed to update your avatar. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -115,10 +125,18 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
       await update({ displayName }); // Update session
 
       router.refresh();
-      alert("Profile updated successfully!");
+      showAlert({
+        type: "success",
+        title: "Profile Updated",
+        message: "Your public profile information has been saved.",
+      });
     } catch (error) {
       console.error(error);
-      alert(`Error updating profile: ${(error as Error).message}`);
+      showAlert({
+        type: "error",
+        title: "Update Failed",
+        message: (error as Error).message || "Failed to update your profile.",
+      });
     } finally {
       setLoading(false);
     }
@@ -141,10 +159,18 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
       await update({ email }); // Update session
 
       router.refresh();
-      alert("Email updated successfully!");
+      showAlert({
+        type: "success",
+        title: "Email Updated",
+        message: "Your email address has been updated successfully.",
+      });
     } catch (error) {
       console.error(error);
-      alert(`Error updating email: ${(error as Error).message}`);
+      showAlert({
+        type: "error",
+        title: "Update Failed",
+        message: (error as Error).message || "Failed to update your email.",
+      });
     } finally {
       setLoading(false);
     }
@@ -153,7 +179,11 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
+      showAlert({
+        type: "warning",
+        title: "Password Mismatch",
+        message: "The new password and confirmation do not match.",
+      });
       return;
     }
     setLoading(true);
@@ -169,12 +199,22 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
       }
       setCurrentPassword("");
       setNewPassword("");
+      setNewPassword("");
       setConfirmPassword("");
-      alert("Password changed successfully!");
-      signOut();
+      showAlert({
+        type: "success",
+        title: "Password Changed",
+        message:
+          "Your password has been changed successfully. You will be signed out.",
+      });
+      setTimeout(() => signOut(), 2000);
     } catch (error) {
       console.error(error);
-      alert(`Error change password: ${(error as Error).message}`);
+      showAlert({
+        type: "error",
+        title: "Change Failed",
+        message: (error as Error).message || "Failed to change password.",
+      });
     } finally {
       setLoading(false);
     }
@@ -194,9 +234,19 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
       }
       setIsPrivate(checked);
       router.refresh();
+      showAlert({
+        type: "info",
+        title: "Privacy Updated",
+        message: `Your account is now ${checked ? "private" : "public"}.`,
+      });
     } catch (error) {
       console.error(error);
-      alert(`Error updating privacy setting: ${(error as Error).message}`);
+      showAlert({
+        type: "error",
+        title: "Update Failed",
+        message:
+          (error as Error).message || "Failed to update privacy settings.",
+      });
     } finally {
       setPrivacyLoading(false);
     }

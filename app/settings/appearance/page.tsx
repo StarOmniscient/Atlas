@@ -14,6 +14,8 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/StarCard";
+import { useAlert } from "@/context/AlertContext";
+import { useConfirm } from "@/context/ConfirmContext";
 
 interface ThemeDescriptor {
   key: string;
@@ -201,6 +203,8 @@ const ThemeSection = ({
 
 export default function AppearanceSettings() {
   const { theme, setTheme } = useTheme();
+  const { showAlert } = useAlert();
+  const confirm = useConfirm();
   const [themeColors, setThemeColors] = useState<
     Record<
       string,
@@ -350,6 +354,11 @@ export default function AppearanceSettings() {
     setRefreshColors((prev) => prev + 1);
     setIsModalOpen(false);
     setEditingTheme(null);
+    showAlert({
+      type: "success",
+      title: "Theme Saved",
+      message: `Theme "${themeToSave.name}" has been saved successfully.`,
+    });
   };
 
   return (
@@ -519,14 +528,16 @@ export default function AppearanceSettings() {
                           variant="destructive"
                           size="sm"
                           className="h-9 w-9 p-0 rounded-full shadow-lg"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            if (
-                              !confirm(
-                                `Are you sure you want to delete "${name}"?`
-                              )
-                            )
-                              return;
+                            const isConfirmed = await confirm({
+                              title: "Delete Theme",
+                              message: `Are you sure you want to delete "${name}"?`,
+                              confirmText: "Delete",
+                              variant: "destructive",
+                            });
+
+                            if (!isConfirmed) return;
 
                             const existingThemes = JSON.parse(
                               localStorage.getItem("user-themes") || "[]"
@@ -557,6 +568,11 @@ export default function AppearanceSettings() {
                                 setInjectedClass(null);
                             }
                             setRefreshColors((prev) => prev + 1);
+                            showAlert({
+                              type: "info",
+                              title: "Theme Deleted",
+                              message: `Theme "${name}" has been removed.`,
+                            });
                           }}
                         >
                           <X className="w-4 h-4" />
