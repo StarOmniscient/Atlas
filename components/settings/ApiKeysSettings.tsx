@@ -17,6 +17,8 @@ import {
 import { Copy, Trash2, Plus, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { StarCard, CardContent } from "@/components/ui/StarCard";
+import { useAlert } from "@/context/AlertContext";
+import { useConfirm } from "@/context/ConfirmContext";
 
 interface ApiKey {
   id: string;
@@ -28,6 +30,8 @@ interface ApiKey {
 
 export function ApiKeysSettings() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
+  const { showAlert } = useAlert();
+  const confirm = useConfirm();
   const [loading, setLoading] = useState(true);
   const [newKeyName, setNewKeyName] = useState("");
   const [createdKey, setCreatedKey] = useState<string | null>(null);
@@ -46,6 +50,11 @@ export function ApiKeysSettings() {
       }
     } catch (error) {
       console.error("Failed to fetch keys", error);
+      showAlert({
+        type: "error",
+        title: "Load Failed",
+        message: "Could not load your API keys. Please refresh.",
+      });
     } finally {
       setLoading(false);
     }
@@ -66,19 +75,31 @@ export function ApiKeysSettings() {
         setCreatedKey(data.key);
         setKeys([data, ...keys]);
         setNewKeyName("");
+        showAlert({
+          type: "success",
+          title: "Key Created",
+          message: "Your new API key has been generated.",
+        });
       }
     } catch (error) {
       console.error("Failed to create key", error);
+      showAlert({
+        type: "error",
+        title: "Creation Failed",
+        message: "Failed to generate a new API key.",
+      });
     }
   };
 
   const handleRegenerateKey = async (id: string, name: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to regenerate the key for "${name}"? The old key will stop working immediately.`
-      )
-    )
-      return;
+    const isConfirmed = await confirm({
+      title: "Regenerate API Key",
+      message: `Are you sure you want to regenerate the key for "${name}"? The old key will stop working immediately.`,
+      confirmText: "Regenerate",
+      variant: "destructive",
+    });
+
+    if (!isConfirmed) return;
 
     try {
       const res = await fetch("/api/settings/api-keys", {
@@ -95,19 +116,32 @@ export function ApiKeysSettings() {
 
         // Update the key in the list (mainly to reset lastUsed if needed)
         setKeys(keys.map((k) => (k.id === id ? { ...k, lastUsed: null } : k)));
+        showAlert({
+          type: "success",
+          title: "Key Regenerated",
+          message: `The key for "${name}" has been reset.`,
+        });
       }
     } catch (error) {
       console.error("Failed to regenerate key", error);
+      showAlert({
+        type: "error",
+        title: "Regeneration Failed",
+        message: "Could not regenerate the API key.",
+      });
     }
   };
 
   const handleDeleteKey = async (id: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to revoke this key? This action cannot be undone."
-      )
-    )
-      return;
+    const isConfirmed = await confirm({
+      title: "Revoke API Key",
+      message:
+        "Are you sure you want to revoke this key? This action cannot be undone.",
+      confirmText: "Revoke",
+      variant: "destructive",
+    });
+
+    if (!isConfirmed) return;
 
     try {
       const res = await fetch(`/api/settings/api-keys?id=${id}`, {
@@ -116,15 +150,29 @@ export function ApiKeysSettings() {
 
       if (res.ok) {
         setKeys(keys.filter((k) => k.id !== id));
+        showAlert({
+          type: "success",
+          title: "Key Revoked",
+          message: "The API key has been successfully deleted.",
+        });
       }
     } catch (error) {
       console.error("Failed to delete key", error);
+      showAlert({
+        type: "error",
+        title: "Revoke Failed",
+        message: "Could not revoke the API key.",
+      });
     }
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert("Copied to clipboard!");
+    showAlert({
+      type: "success",
+      message: "Copied to clipboard!",
+      duration: 2000,
+    });
   };
 
   return (

@@ -7,14 +7,17 @@ import { ReactNode, useEffect } from "react";
 import { THEMES } from "./themes";
 import type { UserTheme } from "@/types/usertheme";
 import { NavigationProvider } from "@/context/NavigationContext";
-
-
+import { AlertProvider } from "@/context/AlertContext";
+import { AlertContainer } from "@/components/ui/AlertContainer";
+import { ConfirmProvider } from "@/context/ConfirmContext";
 
 function UserThemeInjector() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    const userThemes = JSON.parse(localStorage.getItem("user-themes") || "[]") as UserTheme[];
+    const userThemes = JSON.parse(
+      localStorage.getItem("user-themes") || "[]"
+    ) as UserTheme[];
 
     // Inject all user themes
     userThemes.forEach((userTheme) => {
@@ -42,7 +45,7 @@ function UserThemeInjector() {
 
 export function Providers({ children }: { children: ReactNode }) {
   const allThemeKeys = [
-    ...THEMES.map(t => t.key),
+    ...THEMES.map((t) => t.key),
     // We don't know user theme keys at build time, so we allow any string
     // next-themes will accept any theme name not in the list if `disableTransition` or similar is used,
     // but to be safe, we can omit explicit user keys here and rely on runtime injection.
@@ -50,17 +53,22 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <SessionProvider>
-      <NavigationProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          themes={allThemeKeys}
-        >
-          {children}
-          <UserThemeInjector />
-        </ThemeProvider>
-      </NavigationProvider>
+      <AlertProvider>
+        <ConfirmProvider>
+          <NavigationProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              themes={allThemeKeys}
+            >
+              {children}
+              <UserThemeInjector />
+              <AlertContainer />
+            </ThemeProvider>
+          </NavigationProvider>
+        </ConfirmProvider>
+      </AlertProvider>
     </SessionProvider>
   );
 }
