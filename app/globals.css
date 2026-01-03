@@ -47,7 +47,7 @@
   --secondary-foreground: oklch(0.3 0.04 260);
   --muted: oklch(0.92 0.02 260);
   --muted-foreground: oklch(0.5 0.04 260);
-  --accent: oklch(0.65 0.18 200);
+  --accent: oklch(61.534% 0.17704 313.688);
   --accent-foreground: oklch(0.98 0.01 200);
   --destructive: oklch(0.6 0.2 25);
   --border: oklch(0.9 0.02 260);
@@ -113,7 +113,7 @@
   --muted: oklch(0.18 0.04 260);
   --muted-foreground: oklch(0.65 0.05 260);
 
-  --accent: oklch(0.75 0.15 190); /* Supernova Cyan */
+  --accent: oklch(61.534% 0.17704 313.688);
   --accent-foreground: oklch(0.1 0.05 190);
 
   --destructive: oklch(0.55 0.22 25); /* Mars Red */

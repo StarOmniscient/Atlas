@@ -19,6 +19,7 @@ import { StarIcon } from "@/components/icons/StarIcon";
 interface StarMapProps {
   width?: number;
   height?: number;
+  numOfStars?: number;
   className?: string;
   constellations?: Constellation[];
   children?: React.ReactNode;
@@ -28,6 +29,7 @@ interface StarMapProps {
 export function StarMap({
   width = 1200,
   height = 600,
+  numOfStars = 25000,
   className = "",
   constellations = [],
   children,
@@ -57,7 +59,7 @@ export function StarMap({
 
   // Generate random background stars - adjusted for aesthetic balance
   const backgroundStars = useRef(
-    Array.from({ length: 25000 }, () => ({
+    Array.from({ length: numOfStars }, () => ({
       ra: Math.random() * 60 - 18,
       dec: Math.random() * 360 - 180,
       size:

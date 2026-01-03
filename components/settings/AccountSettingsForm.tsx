@@ -26,6 +26,7 @@ interface UserData {
   displayName: string | null;
   avatarUrl: string | null;
   private: boolean;
+  status: string | null;
 }
 
 export function AccountSettingsForm({ user }: { user: UserData }) {
@@ -43,6 +44,7 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
   // Profile State
   const [username, setUsername] = useState(user.username || "");
   const [displayName, setDisplayName] = useState(user.displayName || "");
+  const [statusText, setStatusText] = useState(user.status || "");
 
   // Email State
   const [email, setEmail] = useState(user.email || "");
@@ -136,6 +138,38 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
         type: "error",
         title: "Update Failed",
         message: (error as Error).message || "Failed to update your profile.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch("/api/settings/status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: statusText }),
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg);
+      }
+
+      router.refresh();
+      showAlert({
+        type: "success",
+        title: "Status Updated",
+        message: "Your status has been updated successfully.",
+      });
+    } catch (error) {
+      console.error(error);
+      showAlert({
+        type: "error",
+        title: "Update Failed",
+        message: (error as Error).message || "Failed to update your status.",
       });
     } finally {
       setLoading(false);
@@ -351,7 +385,7 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
             Update your public profile information.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <form onSubmit={handleProfileSubmit} className="flex items-end gap-4">
             <div className="space-y-2 flex-1">
               <Label htmlFor="displayName">Display Name</Label>
@@ -367,6 +401,37 @@ export function AccountSettingsForm({ user }: { user: UserData }) {
               Save Profile
             </Button>
           </form>
+
+          <Separator className="bg-white/5" />
+
+          <div className="space-y-4">
+            <form
+              onSubmit={handleStatusSubmit}
+              className="flex items-end gap-4"
+            >
+              <div className="space-y-2 flex-1">
+                <Label htmlFor="statusText">Status Message</Label>
+                <Input
+                  id="statusText"
+                  value={statusText}
+                  onChange={(e) => setStatusText(e.target.value)}
+                  placeholder="What's on your mind?"
+                  className="max-w-md h-8"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                size="sm"
+                className="h-8"
+              >
+                Save Status
+              </Button>
+            </form>
+            <p className="text-xs text-muted-foreground -mt-2">
+              This message will be shown on your public profile card.
+            </p>
+          </div>
         </CardContent>
       </Card>
 

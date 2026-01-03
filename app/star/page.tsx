@@ -47,6 +47,7 @@ export default function StarPage() {
           height={dimensions.height}
           width={dimensions.width}
           constellations={[]}
+          numOfStars={50000}
           effects={
             <CelestialEffectManager
               ref={effectManagerRef}
