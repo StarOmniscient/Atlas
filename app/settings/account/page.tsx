@@ -20,6 +20,7 @@ export default async function AccountSettingsPage() {
       displayName: true,
       avatarUrl: true,
       private: true,
+      status: true,
     },
   });
 
